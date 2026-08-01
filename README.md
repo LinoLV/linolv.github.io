@@ -1,2 +1,2 @@
-# linolv.github.io
-My website for passwordgame 
+# https://linolv.github.io/
+A website for **PasswordGame**!
