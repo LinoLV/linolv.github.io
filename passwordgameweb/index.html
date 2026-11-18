@@ -137,6 +137,30 @@
     }
 }
 
+     #icon {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 100;
+        display: block;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        transition: transform 0.2s ease;
+    }
+    #icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+    #icon:hover { transform: scale(1.08); }
+    #icon:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+    @media (prefers-reduced-motion: reduce) {
+        #icon { transition: none; }
+    }
+   
     #footer,
     #footer p,
     #footer a {
@@ -189,6 +213,9 @@
 </style>
 </head>
 <body>
+   <a id="icon" href="../" aria-label="Back to linolv.github.io">
+    <img src="../icon.png" alt="">
+   </a>
 <div id="app">
     <div id="gameScreen">
         <h1><br>Lino's Password Game</h1>
