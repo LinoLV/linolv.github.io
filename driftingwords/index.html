@@ -1,1 +1,604 @@
+<!DOCTYPE html>
+<html lang="en" data-tone="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Drifting Words</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Anton&family=Bebas+Neue&family=Bungee&family=Caveat:wght@700&family=Inter:wght@500;700&family=Lobster&family=Orbitron:wght@700&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:wght@700&family=Press+Start+2P&family=Righteous&family=Space+Mono:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/aldo-the-apache">
+<style>
+  :root, :root[data-tone="dark"] {
+    --stage: #000000;
+    --ink: #f2f3f5;
+    --muted: #a3a9b3;
+    --chrome: rgba(24, 26, 30, 0.86);
+    --chrome-line: rgba(255, 255, 255, 0.2);
+    --field: #111316;
+    --accent: #3b82f6;
+    --accent-ink: #ffffff;
+    --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+    --composer-h: 54px;
+    color-scheme: dark;
+  }
+  :root[data-tone="light"] {
+    --ink: #15171a;
+    --muted: #5b616b;
+    --chrome: rgba(255, 255, 255, 0.86);
+    --chrome-line: rgba(21, 23, 26, 0.16);
+    --field: #ffffff;
+    --accent: #2563eb;
+    --accent-ink: #ffffff;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding-block: 0;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    background: var(--stage);
+    color: var(--ink);
+    font: 500 14px/1.3 var(--font-ui);
+    overflow: hidden;
+    transition: background-color 0.35s ease;
+  }
+  #stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
 
+  .chrome {
+    background: var(--chrome);
+    border: 1px solid var(--chrome-line);
+    border-radius: 10px;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: var(--ink);
+  }
+  button, select, input { font: inherit; color: inherit; }
+  button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  #composer {
+    position: fixed;
+    z-index: 5;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+    left: max(16px, env(safe-area-inset-left, 0px));
+    right: max(16px, env(safe-area-inset-right, 0px));
+    max-width: 820px;
+    margin-inline: auto;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  #msg {
+    flex: 1 1 170px;
+    min-width: 0;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--chrome-line);
+    border-radius: 8px;
+    background: var(--field);
+  }
+  #msg::placeholder { color: var(--muted); }
+  #font {
+    flex: 0 1 130px;
+    min-width: 0;
+    height: 38px;
+    padding: 0 8px;
+    border: 1px solid var(--chrome-line);
+    border-radius: 8px;
+    background: var(--field);
+  }
+  #color {
+    width: 38px; height: 38px; padding: 0;
+    border: 1px solid var(--chrome-line); border-radius: 8px; background: var(--field);
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    overflow: hidden;
+  }
+  #color::-webkit-color-swatch-wrapper { padding: 0; }
+  #color::-webkit-color-swatch { border: 0; border-radius: 7px; }
+  #color::-moz-color-swatch { border: 0; border-radius: 7px; }
+  #font:disabled, #color:disabled { opacity: 0.45; cursor: not-allowed; }
+  #shuffle .icon-shuffle-off { display: none; }
+  #shuffle[aria-pressed="false"] .icon-shuffle { display: none; }
+  #shuffle[aria-pressed="false"] .icon-shuffle-off { display: block; }
+  .ctl { display: flex; align-items: center; gap: 8px; }
+  .ctl label { color: var(--muted); font-size: 12px; }
+  #size { width: 90px; accent-color: var(--accent); }
+  #sizeOut { font: 600 12px var(--font-ui); min-width: 3ch; text-align: right; font-variant-numeric: tabular-nums; }
+  .btn {
+    height: 38px; padding: 0 14px;
+    border: 1px solid var(--chrome-line); border-radius: 8px;
+    background: var(--field); cursor: pointer;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.icon-only { width: 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+  .btn.icon-only svg { width: 20px; height: 20px; display: block; }
+  #add { border-radius: 8px; }
+  #coffeeBtn {
+    border-radius: 8px; padding: 0; text-decoration: none;
+  }
+  #coffeeBtn img { width: 30px; height: 30px; object-fit: contain; display: block; }
+  #coffeeBtn .coffeeOnLight { display: none; }
+  :root[data-tone="light"] #coffeeBtn .coffeeOnDark { display: none; }
+  :root[data-tone="light"] #coffeeBtn .coffeeOnLight { display: block; }
+  #pause .icon-play { display: none; }
+  #pause[aria-pressed="true"] .icon-pause { display: none; }
+  #pause[aria-pressed="true"] .icon-play { display: block; }
+  .spacer { flex: 1 1 0; }
+
+  #appIcon {
+    position: fixed; z-index: 6;
+    display: block;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    left: max(16px, env(safe-area-inset-left, 0px));
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+  }
+  #appIcon:hover { transform: scale(1.05); opacity: 0.9; }
+  #appIcon img { width: 100%; height: 100%; display: block; object-fit: contain; border-radius: 10px; }
+
+  #minimize {
+    position: fixed; z-index: 6;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    right: max(16px, env(safe-area-inset-right, 0px));
+    width: 28px; height: 28px; padding: 0; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  #minimize svg { width: 14px; height: 14px; display: block; }
+  #minimize .icon-restore { display: none; }
+  body.minimized #minimize .icon-min { display: none; }
+  body.minimized #minimize .icon-restore { display: block; }
+  body.minimized #composer,
+  body.minimized #soundDock,
+  body.minimized #hits { display: none; }
+
+  #hits {
+    position: fixed; z-index: 5;
+    left: max(16px, env(safe-area-inset-left, 0px));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    padding: 7px 10px;
+    color: var(--ink);
+    font-size: 12px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  @media (max-width: 1040px) {
+    #hits { bottom: calc(env(safe-area-inset-bottom, 0px) + var(--composer-h, 54px) + 20px); }
+  }
+
+  #soundDock {
+    position: fixed; z-index: 5;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--composer-h, 54px) + 20px);
+    display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+    max-width: calc(100vw - 32px);
+  }
+  #soundBox {
+    width: min(360px, calc(100vw - 32px));
+    max-height: 45vh; overflow: auto; padding: 10px;
+  }
+  .boxHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .boxHead .btn { height: 30px; padding: 0 10px; font-size: 12px; }
+  .boxActions { display: flex; gap: 6px; }
+  #closeSounds { font-size: 16px; }
+  .row { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto auto auto; align-items: center; gap: 6px; padding: 4px 0; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--chrome-line); }
+  .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row select { height: 30px; max-width: 112px; border: 1px solid var(--chrome-line); border-radius: 6px; background: var(--field); padding: 0 4px; }
+  .mini { width: 30px; height: 30px; border: 1px solid var(--chrome-line); border-radius: 6px; background: var(--field); cursor: pointer; padding: 0; line-height: 1; }
+  .mini:hover { border-color: var(--accent); }
+  .empty, #soundHint { color: var(--muted); font-size: 12px; }
+  #soundHint { margin-top: 6px; min-height: 1em; }
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-label="Canvas"></canvas>
+
+<a id="appIcon" href="https://linolv.github.io" aria-label="Visit linolv.github.io">
+  <img src="icon.png" alt="Drifting Words">
+</a>
+
+<button class="btn icon-only" id="minimize" type="button" aria-pressed="false" aria-label="Minimize UI" title="Minimize UI">
+  <svg class="icon-min" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  <svg class="icon-restore" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+</button>
+
+<form id="composer" class="chrome" autocomplete="off">
+  <input id="msg" type="text" maxlength="35" placeholder="Type here" aria-label="Text to spawn">
+  <button class="btn primary icon-only" id="add" type="submit" aria-label="Add word" title="Add word">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+  </button>
+  <select id="font" aria-label="Font"></select>
+  <input id="color" type="color" value="#ff453a" aria-label="Text color">
+  <button class="btn icon-only" id="shuffle" type="button" aria-pressed="true" aria-label="Random font and color on" title="Random font and color on">
+    <svg class="icon-shuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.8-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.5-.6-3.3-1.7l-.6-.9"/><path d="m18 14 4 4-4 4"/></svg>
+    <svg class="icon-shuffle-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.8-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.5-.6-3.3-1.7l-.6-.9"/><path d="m18 14 4 4-4 4"/><path d="m2 2 20 20"/></svg>
+  </button>
+  <div class="ctl">
+    <label for="size">Size</label>
+    <input id="size" type="range" min="16" max="160" value="56">
+    <output id="sizeOut" for="size">56</output>
+  </div>
+  <span class="spacer"></span>
+  <button class="btn icon-only" id="pause" type="button" aria-pressed="false" aria-label="Pause" title="Pause">
+    <svg class="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg>
+    <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+  </button>
+  <button class="btn icon-only" id="bgBtn" type="button" aria-label="Change background" title="Change background">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a2.83 2.83 0 1 0 4 4 4 4 0 1 1-4-4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></svg>
+  </button>
+  <button class="btn icon-only" id="toggleSounds" type="button" aria-expanded="false" aria-controls="soundBox" aria-label="Hit sounds" title="Hit sounds">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+  </button>
+  <a class="btn icon-only" id="coffeeBtn" href="https://www.buymeacoffee.com/linolv" target="_blank" rel="noopener noreferrer" aria-label="Buy me a coffee" title="Buy me a coffee">
+    <img class="coffeeOnDark" src="buymeacoffee-dark.png" alt="">
+    <img class="coffeeOnLight" src="buymeacoffee-light.png" alt="">
+  </a>
+</form>
+
+<div id="hits" class="chrome" title="Total wall hits">
+  <span id="hitText">0 hits</span>
+</div>
+
+<div id="soundDock">
+  <div id="soundBox" class="chrome" hidden>
+    <div class="boxHead">
+      <button class="mini" id="closeSounds" type="button" aria-label="Close list" title="Close list">×</button>
+      <span class="boxActions">
+        <button class="btn" id="mute" type="button" aria-pressed="false">Sound on</button>
+        <button class="btn" id="clear" type="button">Clear all</button>
+      </span>
+    </div>
+    <div id="rows"></div>
+    <div id="soundHint"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var LIMIT = 50;
+  var FONTS = [
+    { n: "Inter", g: "sans-serif", w: 700 },
+    { n: "Pacifico", g: "cursive", w: 400 },
+    { n: "Press Start 2P", g: "monospace", w: 400 },
+    { n: "Bebas Neue", g: "sans-serif", w: 400 },
+    { n: "Playfair Display", g: "serif", w: 700 },
+    { n: "Caveat", g: "cursive", w: 700 },
+    { n: "Orbitron", g: "sans-serif", w: 700 },
+    { n: "Space Mono", g: "monospace", w: 700 },
+    { n: "Anton", g: "sans-serif", w: 400 },
+    { n: "Lobster", g: "cursive", w: 400 },
+    { n: "Bungee", g: "sans-serif", w: 400 },
+    { n: "Righteous", g: "sans-serif", w: 400 },
+    { n: "Alfa Slab One", g: "serif", w: 400 },
+    { n: "Permanent Marker", g: "cursive", w: 400 },
+    { n: "Aldo the Apache", g: "cursive", w: 400 },
+    { n: "Times New Roman", g: "serif", w: 700 }
+  ];
+  var BACKGROUNDS = [
+    { name: "White", c: "#ffffff", dark: false },
+    { name: "Midnight blue", c: "#0e1b2c", dark: true },
+    { name: "Dark black", c: "#000000", dark: true }
+  ];
+  var COLORS_DARK = [
+    "#ff453a", "#ff9f0a", "#ffd60a", "#32d74b", "#a3e635", "#30d158",
+    "#00c7be", "#2dd4bf", "#64d2ff", "#22d3ee", "#0a84ff", "#5e5ce6",
+    "#bf5af2", "#ff375f"
+  ];
+  var COLORS_LIGHT = [
+    "#d70015", "#b25000", "#8a6d00", "#1f7a3f", "#3f7d00", "#0b7a55",
+    "#007a70", "#0f766e", "#0060a8", "#0e7490", "#0040dd", "#4638c9",
+    "#8e44ad", "#c2185b"
+  ];
+  var SOUNDS = [
+    { id: "blip", name: "Blip" },
+    { id: "ping", name: "Ping" },
+    { id: "bloop", name: "Bloop" },
+    { id: "click", name: "Click" },
+    { id: "chime", name: "Chime" },
+    { id: "thud", name: "Thud" },
+    { id: "laser", name: "Laser" },
+    { id: "marimba", name: "Marimba" },
+    { id: "pop", name: "Pop" },
+    { id: "pluck", name: "Pluck" },
+    { id: "coin", name: "Coin" },
+    { id: "bell", name: "Bell" },
+    { id: "bass", name: "Bass" },
+    { id: "boing", name: "Boing" },
+    { id: "arp", name: "Arpeggio" },
+    { id: "off", name: "Silent" }
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var canvas = $("stage"), g = canvas.getContext("2d");
+  var items = [], nextId = 1, W = 0, H = 0, paused = false, muted = false, spawnCount = 0, defaultSound = "blip", hits = 0;
+  var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var speedScale = reduced ? 0.5 : 1;
+
+  var AC = window.AudioContext || window.webkitAudioContext, actx = null;
+  function audio() {
+    try {
+      if (!actx && AC) actx = new AC();
+      if (actx && actx.state === "suspended") actx.resume();
+    } catch (e) { actx = null; }
+    updateHint();
+    return actx;
+  }
+  function tone(freq, type, dur, vol, slideTo, delay) {
+    var t = actx.currentTime + (delay || 0);
+    var o = actx.createOscillator(), gn = actx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    gn.gain.setValueAtTime(0.0001, t);
+    gn.gain.exponentialRampToValueAtTime(vol, t + 0.006);
+    gn.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(gn); gn.connect(actx.destination);
+    o.start(t); o.stop(t + dur + 0.03);
+  }
+  var SOUND_FN = {
+    blip: function (m) { tone(660 * m, "square", 0.08, 0.07); },
+    ping: function (m) { tone(1200 * m, "sine", 0.28, 0.16); },
+    bloop: function (m) { tone(300 * m, "sine", 0.16, 0.2, 640 * m); },
+    click: function (m) { tone(1800 * m, "triangle", 0.035, 0.2); },
+    chime: function (m) { tone(880 * m, "sine", 0.5, 0.12); tone(1320 * m, "sine", 0.5, 0.08, 0, 0.04); },
+    thud: function (m) { tone(150 * m, "sine", 0.2, 0.4, 48 * m); },
+    laser: function (m) { tone(1400 * m, "sawtooth", 0.16, 0.06, 200 * m); },
+    marimba: function (m) { tone(523 * m, "sine", 0.22, 0.25); tone(1046 * m, "sine", 0.1, 0.06); },
+    pop: function (m) { tone(720 * m, "sine", 0.09, 0.22, 360 * m); },
+    pluck: function (m) { tone(440 * m, "triangle", 0.18, 0.18, 220 * m); },
+    coin: function (m) { tone(988 * m, "square", 0.07, 0.07); tone(1319 * m, "square", 0.22, 0.07, 0, 0.07); },
+    bell: function (m) { tone(880 * m, "sine", 0.9, 0.1); tone(1760 * m, "sine", 0.6, 0.05, 0, 0.02); },
+    bass: function (m) { tone(110 * m, "sine", 0.35, 0.35, 55 * m); },
+    boing: function (m) { tone(220 * m, "sine", 0.3, 0.18, 660 * m); },
+    arp: function (m) {
+      tone(523 * m, "triangle", 0.16, 0.14);
+      tone(659 * m, "triangle", 0.16, 0.12, 0, 0.06);
+      tone(784 * m, "triangle", 0.16, 0.1, 0, 0.12);
+      tone(1046 * m, "triangle", 0.22, 0.08, 0, 0.18);
+    },
+    off: function () {}
+  };
+  function play(soundId, pitch) {
+    if (muted || soundId === "off") return;
+    if (!audio() || actx.state !== "running") return;
+    (SOUND_FN[soundId] || SOUND_FN.blip)(pitch || 1);
+  }
+  function updateHint() {
+    var h = $("soundHint");
+    if (!h) return;
+    h.textContent = (!actx || actx.state !== "running") ? "Tap the page once to turn sound on." : "";
+  }
+  function bumpHits(n) {
+    hits += n;
+    $("hitText").textContent = hits + (hits === 1 ? " hit" : " hits");
+  }
+  window.addEventListener("pointerdown", audio, { passive: true });
+  window.addEventListener("keydown", audio);
+
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    items.forEach(function (it) {
+      it.x = Math.max(0, Math.min(it.x, W - it.w));
+      it.y = Math.max(0, Math.min(it.y, H - it.h));
+    });
+    var composer = $("composer");
+    if (composer) {
+      document.documentElement.style.setProperty("--composer-h", composer.offsetHeight + "px");
+    }
+  }
+  window.addEventListener("resize", resize);
+
+  function fontDef(name) { return FONTS.filter(function (f) { return f.n === name; })[0] || FONTS[0]; }
+  function fontStr(it) { var f = fontDef(it.font); return f.w + " " + it.size + "px \"" + f.n + "\", " + f.g; }
+  function measure(it) {
+    g.font = fontStr(it);
+    it.w = Math.ceil(g.measureText(it.text).width);
+    it.h = Math.ceil(it.size * 1.15);
+  }
+  function colorAt(i) {
+    var palette = document.documentElement.getAttribute("data-tone") === "dark" ? COLORS_DARK : COLORS_LIGHT;
+    return palette[i % palette.length];
+  }
+
+  function spawn(text, fontName, color, colorIndex, size, soundId) {
+    if (items.length >= LIMIT) return;
+    var it = { id: nextId++, text: text, font: fontName, ci: colorIndex, color: color, size: size, sound: soundId, flash: 0, last: 0 };
+    var f = fontDef(fontName);
+    var ready = document.fonts && document.fonts.load ? document.fonts.load(f.w + " " + size + "px \"" + f.n + "\"", text).catch(function () {}) : Promise.resolve();
+    ready.then(function () {
+      if (items.length >= LIMIT) return;
+      measure(it);
+      if (it.w > W * 0.95) { it.size = Math.max(10, Math.floor(it.size * (W * 0.95) / it.w)); measure(it); }
+      it.x = (W - it.w) / 2; it.y = (H - it.h) / 2;
+      var sp = (150 + Math.random() * 90) * speedScale;
+      var ang = (Math.PI / 4) + (Math.random() - 0.5) * 0.7;
+      it.vx = Math.cos(ang) * sp * (Math.random() < 0.5 ? -1 : 1);
+      it.vy = Math.sin(ang) * sp * (Math.random() < 0.5 ? -1 : 1);
+      items.push(it);
+      refreshUI();
+    });
+    return it;
+  }
+
+  var lastT = performance.now();
+  function frame(now) {
+    var dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+    g.clearRect(0, 0, W, H);
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if (!paused) {
+        it.x += it.vx * dt; it.y += it.vy * dt;
+        var hx = false, hy = false;
+        if (it.x <= 0) { it.x = 0; it.vx = Math.abs(it.vx); hx = true; }
+        else if (it.x + it.w >= W) { it.x = Math.max(0, W - it.w); it.vx = -Math.abs(it.vx); hx = true; }
+        if (it.y <= 0) { it.y = 0; it.vy = Math.abs(it.vy); hy = true; }
+        else if (it.y + it.h >= H) { it.y = Math.max(0, H - it.h); it.vy = -Math.abs(it.vy); hy = true; }
+        if ((hx || hy) && now - it.last > 40) {
+          it.last = now;
+          bumpHits((hx ? 1 : 0) + (hy ? 1 : 0));
+          if (hx && hy) {
+            play(it.sound, 1);
+            setTimeout(function (s) { return function () { play(s, 1.5); }; }(it.sound), 90);
+            it.flash = 0.45;
+          } else {
+            play(it.sound, 1);
+            it.flash = 0.2;
+          }
+        }
+        if (it.flash > 0) it.flash = Math.max(0, it.flash - dt);
+      }
+      g.font = fontStr(it);
+      g.textBaseline = "middle"; g.textAlign = "left";
+      g.fillStyle = it.color;
+      if (it.flash > 0) { g.shadowColor = it.color; g.shadowBlur = 28 * (it.flash / 0.45); }
+      g.fillText(it.text, it.x, it.y + it.h / 2);
+      g.shadowBlur = 0;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function refreshUI() {
+    var full = items.length >= LIMIT;
+    $("add").disabled = full;
+    $("add").title = full ? "Limit reached. Remove one to spawn another." : "Add word";
+    var rows = $("rows");
+    rows.textContent = "";
+    if (!items.length) {
+      var e = document.createElement("div");
+      e.className = "empty"; e.textContent = "Nothing on stage yet. Add a word and it will show up here.";
+      rows.appendChild(e);
+      return;
+    }
+    items.forEach(function (it) {
+      var r = document.createElement("div"); r.className = "row";
+      var d = document.createElement("span"); d.className = "dot"; d.style.background = it.color;
+      var l = document.createElement("span"); l.className = "lbl"; l.textContent = it.text; l.title = it.text;
+      var s = document.createElement("select");
+      s.setAttribute("aria-label", "Sound for " + it.text);
+      SOUNDS.forEach(function (sd) {
+        var o = document.createElement("option"); o.value = sd.id; o.textContent = sd.name;
+        if (sd.id === it.sound) o.selected = true;
+        s.appendChild(o);
+      });
+      s.addEventListener("change", function () { it.sound = s.value; defaultSound = s.value; play(it.sound, 1); });
+      var p = document.createElement("button"); p.type = "button"; p.className = "mini"; p.textContent = "▶";
+      p.setAttribute("aria-label", "Preview sound for " + it.text);
+      p.addEventListener("click", function () { audio(); play(it.sound, 1); });
+      var x = document.createElement("button"); x.type = "button"; x.className = "mini"; x.textContent = "×";
+      x.setAttribute("aria-label", "Remove " + it.text);
+      x.addEventListener("click", function () { items = items.filter(function (o) { return o !== it; }); refreshUI(); });
+      r.appendChild(d); r.appendChild(l); r.appendChild(s); r.appendChild(p); r.appendChild(x);
+      rows.appendChild(r);
+    });
+  }
+
+  var fontSel = $("font");
+  FONTS.forEach(function (f) {
+    var o = document.createElement("option");
+    o.value = f.n; o.textContent = f.n;
+    fontSel.appendChild(o);
+  });
+
+  var shuffleOn = true;
+  function applyShuffle() {
+    var label = shuffleOn ? "Random font, color and sound on" : "Random font, color and sound off";
+    $("shuffle").setAttribute("aria-pressed", String(shuffleOn));
+    $("shuffle").setAttribute("aria-label", label);
+    $("shuffle").title = label;
+    fontSel.disabled = shuffleOn;
+    $("color").disabled = shuffleOn;
+  }
+  $("shuffle").addEventListener("click", function () { shuffleOn = !shuffleOn; applyShuffle(); });
+  applyShuffle();
+
+  $("composer").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    audio();
+    var text = $("msg").value.trim();
+    if (!text || items.length >= LIMIT) return;
+    var font, color, ci;
+    if (shuffleOn) {
+      font = FONTS[Math.floor(Math.random() * FONTS.length)].n;
+      ci = Math.floor(Math.random() * COLORS_DARK.length);
+      color = colorAt(ci);
+      fontSel.value = font;
+      $("color").value = color;
+    } else {
+      font = fontSel.value;
+      ci = -1;
+      color = $("color").value;
+    }
+    var snd = shuffleOn ? SOUNDS[spawnCount % (SOUNDS.length - 1)].id : defaultSound;
+    if (shuffleOn) spawnCount++;
+    spawn(text, font, color, ci, parseInt($("size").value, 10), snd);
+    $("msg").value = "";
+    $("msg").focus();
+  });
+  $("size").addEventListener("input", function () { $("sizeOut").textContent = $("size").value; });
+  $("pause").addEventListener("click", function () {
+    paused = !paused;
+    $("pause").setAttribute("aria-pressed", String(paused));
+    $("pause").setAttribute("aria-label", paused ? "Play" : "Pause");
+    $("pause").title = paused ? "Play" : "Pause";
+  });
+  $("clear").addEventListener("click", function () { items = []; refreshUI(); });
+  $("mute").addEventListener("click", function () {
+    muted = !muted;
+    $("mute").textContent = muted ? "Sound off" : "Sound on";
+    $("mute").setAttribute("aria-pressed", String(muted));
+  });
+  $("toggleSounds").addEventListener("click", function () {
+    var box = $("soundBox"), hide = !box.hidden;
+    box.hidden = hide;
+    $("toggleSounds").setAttribute("aria-expanded", String(!hide));
+  });
+  $("closeSounds").addEventListener("click", function () {
+    $("soundBox").hidden = true;
+    $("toggleSounds").setAttribute("aria-expanded", "false");
+  });
+
+  $("minimize").addEventListener("click", function () {
+    var hide = !document.body.classList.contains("minimized");
+    document.body.classList.toggle("minimized", hide);
+    $("minimize").setAttribute("aria-pressed", String(hide));
+    $("minimize").setAttribute("aria-label", hide ? "Show UI" : "Minimize UI");
+    $("minimize").title = hide ? "Show UI" : "Minimize UI";
+  });
+
+  var bgIndex = 2;
+  function setBg(i) {
+    bgIndex = ((i % BACKGROUNDS.length) + BACKGROUNDS.length) % BACKGROUNDS.length;
+    var b = BACKGROUNDS[bgIndex];
+    document.documentElement.style.setProperty("--stage", b.c);
+    document.documentElement.setAttribute("data-tone", b.dark ? "dark" : "light");
+    items.forEach(function (it) { if (it.ci >= 0) it.color = colorAt(it.ci); });
+    $("bgBtn").setAttribute("aria-label", "Change background (current: " + b.name + ")");
+    $("bgBtn").title = "Background: " + b.name;
+  }
+  setBg(bgIndex);
+  $("bgBtn").addEventListener("click", function () { setBg(bgIndex + 1); });
+
+  resize();
+  refreshUI();
+  updateHint();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
