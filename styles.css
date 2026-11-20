@@ -10,7 +10,7 @@
     --pill-line: rgba(0, 0, 0, 0.08);
     --badge-bg: #f0f0f2;
     --muted: rgba(245, 245, 247, 0.6);
-    --tile: min(38vw, 42vh, 360px);
+    --tile: min(30vw, 42vh, 340px);
     --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
     color-scheme: dark;
   }
@@ -72,6 +72,7 @@
   .tiles {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: clamp(12px, 2.5vw, 28px);
   }
   .tile {
@@ -203,7 +204,7 @@
   :root[data-theme="light"] #themeBtn .icon-sun { display: block; }
   :root[data-theme="light"] #themeBtn .icon-moon { display: none; }
   @media (max-width: 600px) {
-    :root { --tile: min(40vw, 34vh, 260px); }
+    :root { --tile: min(29vw, 32vh, 200px); }
     #cornerIcon { width: 40px; height: 40px; }
     .pill { height: 44px; }
     .coffeeIcon,
