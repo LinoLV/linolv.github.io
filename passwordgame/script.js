@@ -1,0 +1,386 @@
+
+const common_patterns = ["1234", "qwerty", "11111", "123", "abc123", "0000", "password",
+    "7777", "999", "qwertyuiop", "444", "333", "8888", "6666",
+    "789", "4567", "3456"];
+const months = ["january","february","march","april","may","june","july","august","september","october","november","december"];
+const nos = ["one","two","three","four","five","six","seven","eight","nine","ten"];
+const colors = ["red", "blue", "green", "yellow", "orange", "purple", "pink", "black", "white", "brown", "gray", "grey", "magenta", "lime", "cyan", "violet", "indigo"];
+const hexRegex = /#[0-9A-Fa-f]{6}/;
+const romanValues = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+const romanRegex = /[IVXLCDM]/;
+const passwordField = document.getElementById('password_field');
+const charCount = document.getElementById('char_count');
+const labelMessage = document.getElementById('label_message');
+const gameScreen = document.getElementById('gameScreen');
+const winScreen = document.getElementById('winScreen');
+const winTitle = document.getElementById('winTitle');
+const winSub = document.getElementById('winSub');
+const errorSound = document.getElementById('errorSound');
+const completeSound = document.getElementById('completeSound');
+const popperSound = document.getElementById('popperSound');
+
+const socialButtonsTemplate = document.getElementById('socialButtonsTemplate');
+document.querySelectorAll('[data-social-buttons]').forEach(container => {
+    container.append(socialButtonsTemplate.content.cloneNode(true));
+});
+
+let typingTimeout;
+let lastRulesText = "";
+
+let keyboardAudioContext;
+let lastKeySoundTime = 0;
+
+const keyboardSoundFolder = './sounds/';
+
+const keyboardSoundFiles = [
+    'key1.wav',
+    'key2.wav',
+    'key3.wav',
+    'key4.wav',
+    'key5.wav',
+    'key6.wav',
+    'back.wav',
+    'tab.wav',
+    'ent.wav',
+    'ctrl.wav',
+    'shift.wav',
+    'space.wav',
+    'caps.wav'
+];
+
+const keyboardSounds = {};
+
+keyboardSoundFiles.forEach(file => {
+    const audio = new Audio(keyboardSoundFolder + file);
+    audio.preload = 'auto';
+    audio.volume = 0.5;
+    keyboardSounds[file] = audio;
+});
+
+document.addEventListener('touchstart', () => {
+    Object.values(keyboardSounds).forEach(sound => {
+        sound.play().then(() => {
+            sound.pause();
+            sound.currentTime = 0;
+        }).catch(() => {});
+    });
+}, { once: true });
+
+function playKeyboardSound(key) {
+    let file;
+
+    if (key === 'Backspace' || key === 'Delete') {
+        file = 'back.wav';
+    } else if (key === 'Enter') {
+        file = 'ent.wav';
+    } else if (key === ' ') {
+        file = 'space.wav';
+    } else if (key === 'Tab') {
+        file = 'tab.wav';
+    } else if (key === 'Shift') {
+        file = 'shift.wav';
+    } else if (key === 'Control') {
+        file = 'ctrl.wav';
+    } else {
+        file = `key${Math.floor(Math.random() * 6) + 1}.wav`;
+    }
+
+    const now = performance.now();
+    if (now - lastKeySoundTime < 25) return;
+    lastKeySoundTime = now;
+
+    const original = keyboardSounds[file];
+    if (!original) return;
+
+    const sound = original.cloneNode();
+    sound.volume = 0.5;
+
+    sound.play().catch(error => {
+        console.error('Could not play keyboard sound:', file, error);
+    });
+}
+
+passwordField.addEventListener('beforeinput', (e) => {
+    let keyDetected = '';
+
+    if (e.inputType === 'deleteContentBackward' || e.inputType === 'deleteContentForward') {
+        keyDetected = 'Backspace';
+    } else if (e.inputType === 'insertLineBreak') {
+        keyDetected = 'Enter';
+    } else if (e.inputType === 'insertText' || e.inputType === 'insertCompositionText') {
+        keyDetected = e.data === ' ' ? ' ' : 'RegularKey';
+    }
+
+    if (keyDetected) {
+        playKeyboardSound(keyDetected);
+    }
+});
+
+passwordField.addEventListener('keydown', (e) => {
+    const structuralKeys = ['Backspace', 'Delete', 'Enter', 'Tab', 'Shift', 'Control'];
+    if (structuralKeys.includes(e.key) || e.key === ' ') {
+        if (e.key === ' ' || e.key === 'Backspace' || e.key === 'Enter') return;
+        
+        playKeyboardSound(e.key);
+    }
+});
+
+function has_total_25(p) {
+    return p.split('').filter(c => /\d/.test(c)).reduce((sum, c) => sum + parseInt(c), 0) === 25;
+}
+
+function has_roman_total_28(p) {
+    const total = [...p].reduce((sum, c) => {
+        return romanRegex.test(c) ? sum + romanValues[c] : sum;
+    }, 0);
+    return total === 28;
+}
+
+function animateRules() {
+    labelMessage.style.animation = 'none';
+    labelMessage.offsetHeight; 
+    labelMessage.style.animation = 'slideInBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards';
+}
+
+function check_password(paswd) {
+    charCount.textContent = `Characters: ${paswd.length}`;
+    if (!paswd) {
+        labelMessage.textContent = "";
+        labelMessage.style.animation = 'none';
+        lastRulesText = "";
+        return;
+    }
+
+    let rules = [];
+
+    rules.push(["Password must contain a lowercase letter", p => /[a-z]/.test(p)]);
+    if (rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain an uppercase letter", p => /[A-Z]/.test(p)]);
+
+    if (rules.length == 2 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain at least 7 characters", p => p.length >= 7]);
+
+    if (rules.length == 3 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain a number", p => /\d/.test(p)]);
+
+    if (rules.length == 4 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain the name of a month", p => months.some(m => p.toLowerCase().includes(m))]);
+
+    if (rules.length == 5 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain a number name between 1-10", p => nos.some(n => p.toLowerCase().includes(n))]);
+
+    if (rules.length == 6 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain a hashtag", p => p.includes('#')]);
+
+    if (rules.length == 7 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain '@'", p => p.includes('@')]);
+
+    if (rules.length == 8 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain the 'and' symbol", p => p.includes('&')]);
+
+    if (rules.length == 9 && rules[rules.length-1][1](paswd))
+    rules.push(["The digits in the password must add up to 25", p => has_total_25(p)]);
+
+    if (rules.length == 10 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain an exclamation mark", p => p.includes('!')]);
+
+    if (rules.length == 11 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain the star symbol", p => p.includes('*')]);
+
+    if (rules.length == 12 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain a percentage symbol", p => p.includes('%')]);
+
+    if (rules.length == 13 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain a question mark", p => p.includes('?')]);
+
+    if (rules.length == 14 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must not contain a common pattern", p => !common_patterns.some(x => p.toLowerCase().includes(x))]);
+
+    if (rules.length == 15 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain a Roman numeral", p => romanRegex.test(p)]);
+
+    if (rules.length == 16 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain a color name", p => colors.some(c => p.toLowerCase().includes(c))]);
+
+    if (rules.length == 17 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain both an even and an odd digit", p => /[02468]/.test(p) && /[13579]/.test(p)]);
+
+    if (rules.length == 18 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must contain a valid hex color code", p => hexRegex.test(p)]);
+
+    if (rules.length == 19 && rules[rules.length-1][1](paswd))
+    rules.push(["Password length must be a multiple of 3", p => p.length % 3 === 0]);
+
+    if (rules.length == 20 && rules[rules.length-1][1](paswd))
+    rules.push(["The Roman numerals in the password must add up to 28", p => has_roman_total_28(p)]);
+
+    if (rules.length == 21 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must not contain spaces", p => !p.includes(' ')]);
+
+    if (rules.length == 22 && rules[rules.length-1][1](paswd))
+    rules.push(["Password must not contain dots", p => !p.includes('.')]);
+
+    let red_rules = [];
+    let green_rules = [];
+    let all_green = true;
+
+    rules.forEach(([msg, check], i) => {
+        if (check(paswd)) {
+            green_rules.push(`<span class="green">Rule ${i+1}: ${msg}</span>`);
+        } else {
+            red_rules.push(`<span class="red">Rule ${i+1}: ${msg}</span>`);
+            all_green = false;
+        }
+    });
+
+    let new_text = [...red_rules, ...green_rules].join('<br><br>');
+
+    if (new_text !== lastRulesText) {
+        if (!all_green) {
+            errorSound.currentTime = 0;
+            errorSound.play().catch(()=>{});
+        } else {
+            completeSound.currentTime = 0;
+            completeSound.play().catch(()=>{});
+            if (rules.length === 23) {
+                setTimeout(show_win_screen, 1000);
+            }
+        }
+    }
+
+    labelMessage.innerHTML = new_text;
+    animateRules();
+    lastRulesText = new_text;
+}
+
+function show_win_screen() {
+    if (winScreen.style.display === 'block') return;
+    gameScreen.style.display = 'none';
+    winScreen.style.display = 'block';
+    setTimeout(() => winTitle.style.opacity = 1, 100);
+    setTimeout(() => winSub.style.opacity = 1, 300);
+
+    popperSound.currentTime = 0;
+    popperSound.volume = 0.6;
+    popperSound.play().catch(() => {});
+    launchConfetti();
+}
+
+const CONFETTI_COLORS = ['#00FF00', '#CCFF00', '#00FFFF', '#FF00FF', '#FFD700', '#FF5555', '#FFFFFF', '#7CFFB2'];
+
+function launchConfetti() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (document.getElementById('confettiCanvas')) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'confettiCanvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    let width = 0;
+    let height = 0;
+
+    function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    const pieces = [];
+    const EMIT_MS = 4000;
+    const SPAWN_INTERVAL = 20;
+    let spawnTimer = 0;
+    let elapsed = 0;
+    let lastTime = performance.now();
+
+    function spawn(x, y, minAngle, maxAngle) {
+        const angle = (minAngle + Math.random() * (maxAngle - minAngle)) * Math.PI / 180;
+        const speed = 15 + Math.random() * 11;
+
+        pieces.push({
+            x: x + (Math.random() - 0.5) * 24,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: -Math.sin(angle) * speed,
+            w: 5 + Math.random() * 6,
+            h: 8 + Math.random() * 8,
+            color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+            rotation: Math.random() * Math.PI * 2,
+            rotationSpeed: (Math.random() - 0.5) * 0.32,
+            flip: Math.random() * Math.PI * 2,
+            flipSpeed: 0.08 + Math.random() * 0.16,
+            age: 0,
+            lifetime: 2600 + Math.random() * 1600
+        });
+    }
+
+    function frame(now) {
+        const dt = Math.min(now - lastTime, 50);
+        lastTime = now;
+        elapsed += dt;
+        const step = dt / (1000 / 60);
+
+        if (elapsed < EMIT_MS) {
+            spawnTimer += dt;
+            while (spawnTimer >= SPAWN_INTERVAL) {
+                spawnTimer -= SPAWN_INTERVAL;
+                spawn(0, height - 4, 55, 82);
+                spawn(width, height - 4, 98, 125);
+            }
+        }
+
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = pieces.length - 1; i >= 0; i--) {
+            const p = pieces[i];
+            p.age += dt;
+
+            if (p.age > p.lifetime || p.y > height + 60) {
+                pieces.splice(i, 1);
+                continue;
+            }
+
+            p.vy += 0.3 * step;
+            p.vx *= Math.pow(0.99, step);
+            p.vy *= Math.pow(0.99, step);
+            p.x += p.vx * step;
+            p.y += p.vy * step;
+            p.rotation += p.rotationSpeed * step;
+            p.flip += p.flipSpeed * step;
+
+            const remaining = p.lifetime - p.age;
+            ctx.globalAlpha = remaining < 700 ? remaining / 700 : 1;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.scale(1, Math.cos(p.flip));
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.restore();
+        }
+
+        ctx.globalAlpha = 1;
+
+        if (elapsed < EMIT_MS || pieces.length > 0) {
+            requestAnimationFrame(frame);
+        } else {
+            window.removeEventListener('resize', resize);
+            canvas.remove();
+        }
+    }
+
+    requestAnimationFrame(frame);
+}
+
+passwordField.addEventListener('input', (e) => {
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => check_password(e.target.value), 400);
+});

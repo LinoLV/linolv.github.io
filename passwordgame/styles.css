@@ -1,0 +1,207 @@
+
+    * { box-sizing: border-box; font-family: 'Noto Sans', sans-serif; }
+    body {
+        margin: 0;
+        background: #121212;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+    #app {
+        width: 100%;
+        max-width: 600px;
+        background: #1e1e1e;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0,255,0,0.1);
+    }
+    h1 {
+        color: #00FF00;
+        text-align: center;
+        margin: 0 0 20px 0;
+        font-size: 2em;
+    }
+    input {
+        width: 90%;
+        display: block;
+        margin: 0 auto 20px auto;
+        padding: 12px;
+        font-size: 16px;
+        background: #000;
+        border: 2px solid #444;
+        color: #fff;
+        border-radius: 8px;
+        outline: none;
+        caret-color: #CCFF00;
+    }
+    input::placeholder { color: #aaa; }
+    #char_count { text-align: left; margin-bottom: 10px; }
+    
+    #label_message {
+        white-space: pre-wrap;
+        line-height: 1.6;
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    @keyframes slideInBounce {
+        0% { opacity: 0; transform: translateY(-20px); }
+        60% { opacity: 1; transform: translateY(5px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .red { color: #FF0000; }
+    .green { color: #00FF00; }
+    
+.social-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0;
+    height: 42px;
+    padding: 9px;
+    overflow: hidden;
+    white-space: nowrap;
+    border-radius: 21px;
+    font-size: 14px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition:
+        width 0.3s ease,
+        gap 0.3s ease,
+        transform 0.2s ease;
+}
+
+.social-btn img,
+.social-btn svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.social-btn span {
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    transition:
+        opacity 0.2s ease,
+        max-width 0.35s ease;
+}
+
+.social-btn:hover {
+    gap: 10px;
+    transform: scale(1.05);
+}
+
+.social-btn:hover span {
+    opacity: 1;
+    max-width: 140px;
+    padding-right: 6px;
+}
+
+.bmc-social {
+    background: #FFFFFF;
+    color: #000;
+}
+
+.youtube-social {
+    background: #FF0000;
+}
+
+.social-btn:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .social-btn,
+    .social-btn span {
+        transition: none;
+    }
+}
+
+     #icon {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 100;
+        display: block;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        transition: transform 0.2s ease;
+    }
+    #icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+    #icon:hover { transform: scale(1.08); }
+    #icon:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+    @media (prefers-reduced-motion: reduce) {
+        #icon { transition: none; }
+    }
+   
+    #footer,
+    #footer p,
+    #footer a {
+        font-family: 'Roboto', Arial, Helvetica, sans-serif;
+        font-weight: 400;
+    }
+    #footer {
+        width: 100%;
+        max-width: 600px;
+        margin-top: auto;
+        padding: 18px 10px 4px;
+        text-align: center;
+        font-size: 0.85em;
+        line-height: 1.6;
+        color: #9a9a9a;
+    }
+    #footer p { margin: 0; }
+    #footer a {
+        color: #bdbdbd;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+    #footer a:hover { color: #fff; }
+
+    #winScreen {
+        display: none;
+        text-align: center;
+        padding-top: 60px;
+    }
+    #winTitle {
+        font-size: 3em;
+        color: #00FF00;
+        opacity: 0;
+        transition: opacity 1s;
+    }
+    #winSub {
+        font-size: 1.2em;
+        color: #00FFFF;
+        opacity: 0;
+        transition: opacity 1.2s;
+    }
+    #confettiCanvas {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9999;
+    }
