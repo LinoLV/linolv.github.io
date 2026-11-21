@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#000000" />
+  <title>Particle Field</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="stage" aria-label="Particle Field game">
+    <canvas id="trail-canvas" aria-hidden="true"></canvas>
+    <canvas id="ui-canvas" aria-hidden="true"></canvas>
+
+    <a id="appIcon" href="https://linolv.github.io" aria-label="Visit linolv.github.io">
+      <img src="../icon.png" alt="Particle Field">
+    </a>
+
+    <header class="hud">
+      <div class="hud-stats">
+        <span class="stat"><span class="stat-label">SCORE</span><span id="score" class="stat-value">0</span></span>
+        <span class="stat"><span class="stat-label">LVL</span><span id="level" class="stat-value">1</span></span>
+      </div>
+      <div class="hud-actions">
+        <span class="stat mode-stat" id="mode-label" aria-live="polite" aria-label="Current level mode">
+          <span class="stat-label">MODE</span>
+          <span class="stat-value" id="mode-value">ATTRACT</span>
+        </span>
+        <a id="moreBtn" href="https://linolv.github.io" title="More games">More Games</a>
+        <a id="coffeeBtn" href="https://www.buymeacoffee.com/linolv" target="_blank" rel="noopener noreferrer" aria-label="Buy me a coffee" title="Buy me a coffee">
+          <img src="../driftingwords/buymeacoffee-light.png" alt="">
+        </a>
+      </div>
+    </header>
+
+    <p id="hint" class="hint">
+      Tap / Hold to control the particles
+      <span>Drag to steer</span>
+    </p>
+
+    <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+      <div class="panel">
+        <div id="overlay-kicker" class="kicker">LEVEL 1 COMPLETE</div>
+        <h1 id="overlay-title">Field cleared.</h1>
+        <div class="result-stats">
+          <div><span>SCORE</span><b id="final-score">0</b></div>
+        </div>
+        <button id="next-btn" class="primary" type="button">Next level →</button>
+      </div>
+    </div>
+  </main>
+
+  <audio id="completeSound" src="../passwordgame/sounds/complete.mp3" preload="auto"></audio>
+
+  <script src="game.js" defer></script>
+</body>
+</html>
