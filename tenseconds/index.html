@@ -10,7 +10,7 @@
 <style>
   @font-face {
     font-family: 'Aldo the Apache';
-    src: url('aldo-the-apache.woff') format('woff');
+    src: url('../aldo-the-apache.woff') format('woff');
     font-weight: 400;
     font-display: swap;
   }
@@ -70,6 +70,36 @@
     object-fit: contain;
   }
   .home-link:hover { transform: scale(1.12); }
+
+  .more-link {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 9px;
+    background: var(--lime);
+    color: #071207;
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 0 8px rgba(53, 196, 110, 0.9),
+                0 0 26px rgba(53, 196, 110, 0.55);
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  }
+  .more-link:hover {
+    background: var(--lime-bright);
+    box-shadow: 0 0 12px rgba(92, 224, 138, 1),
+                0 0 38px rgba(53, 196, 110, 0.75);
+    transform: translateY(-1px);
+  }
 
   main { width: min(620px, 100%); }
 
@@ -253,6 +283,8 @@
 <a class="home-link" href="https://linolv.github.io" aria-label="Go to linolv.github.io">
   <img src="../icon.png" alt="Home">
 </a>
+
+<a class="more-link" href="https://linolv.github.io" title="More games">More Games</a>
 
 <main>
   <h1>Stop exactly at 10 seconds</h1>
