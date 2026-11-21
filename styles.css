@@ -70,7 +70,7 @@
   h1 {
     margin: 0;
     font-family: "Aldo the Apache", cursive;
-    font-size: clamp(32px, 5vw, 64px);
+    font-size: clamp(40px, 6vw, 76px);
     font-weight: 400;
     line-height: 1.1;
     letter-spacing: 0;
@@ -211,10 +211,10 @@
   :root[data-theme="light"] #themeBtn .icon-sun { display: block; }
   :root[data-theme="light"] #themeBtn .icon-moon { display: none; }
   @media (max-width: 600px) {
-    :root { --tile: min(29vw, 32vh, 200px); }
+    :root { --tile: min(40vw, 30vh, 200px); }
     #cornerIcon { width: 40px; height: 40px; }
-    .pill { height: 44px; }
+    .pill { height: 54px; padding: 9px; font-size: 15px; }
     .coffeeIcon,
-    .badge { width: 28px; height: 28px; }
-    .badge svg { width: 16px; height: 16px; }
+    .badge { width: 36px; height: 36px; }
+    .badge svg { width: 20px; height: 20px; }
   }
