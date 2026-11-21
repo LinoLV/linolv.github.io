@@ -104,7 +104,11 @@ html, body {
 }
 
 .mode-stat { white-space: nowrap; }
-.mode-stat .stat-label { color: rgba(156, 255, 46, 0.5); }
+.mode-stat .stat-label { color: rgba(77, 141, 255, 0.5); }
+.mode-stat[data-mode="attract"] .stat-value {
+  color: #7ba9ff;
+  text-shadow: 0 0 12px rgba(77, 141, 255, 0.35);
+}
 .mode-stat[data-mode="repel"] .stat-label { color: rgba(255, 107, 107, 0.5); }
 .mode-stat[data-mode="repel"] .stat-value {
   color: #ff8a8a;
@@ -174,19 +178,17 @@ html, body {
   width: max-content;
   max-width: min(88vw, 640px);
   text-align: center;
-  font-size: 11px;
-  line-height: 1.7;
-  letter-spacing: 0.04em;
-  color: rgba(156, 255, 46, 0.6);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  color: rgba(156, 255, 46, 0.8);
   pointer-events: none;
   transition: opacity 600ms ease;
 }
 
 .hint span {
   display: block;
-  color: rgba(156, 255, 46, 0.32);
-  font-size: 9px;
-  letter-spacing: 0.14em;
 }
 
 .hint.faded { opacity: 0; }
@@ -279,6 +281,6 @@ html, body {
   .mode-stat .stat-value { font-size: 13px; }
   #moreBtn { height: 30px; padding: 0 8px; font-size: 10px; }
   #coffeeBtn { width: 30px; height: 30px; padding: 4px; border-radius: 8px; }
-  .hint { font-size: 10px; }
+  .hint { font-size: 16px; }
   .panel { padding: 28px 22px 24px; }
 }

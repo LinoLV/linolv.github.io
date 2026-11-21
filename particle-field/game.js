@@ -2,6 +2,7 @@
   'use strict';
 
   const TAU = Math.PI * 2;
+  const HINT_IDLE_MS = 3000;
 
   const stage = document.getElementById('stage');
   const trailCanvas = document.getElementById('trail-canvas');
@@ -39,9 +40,9 @@
   const CFG = {
     particleRadius: 7,
     targetRadius: 24,
-    fieldRadius: 115,
-    repelFieldRadius: 140,
-    attractForce: 1350,
+    fieldRadius: 95,
+    repelFieldRadius: 118,
+    attractForce: 1600,
     repelForce: 2600,
     pulseForce: 3200,
     repelPulseForce: 5600,
@@ -69,14 +70,19 @@
   let pulse = null;
   let activePointerId = null;
   let lastTime = 0;
-  let interacted = false;
-  let restRemaining = 0;
+  let forceApplied = false;
+  let idleHintTimer = null;
   let audioCtx = null;
 
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const rand = (lo, hi) => lo + Math.random() * Math.max(0, hi - lo);
   const tx = t => t.rx * W;
   const ty = t => t.ry * H;
+
+  function fieldRadiusFor(mode) {
+    const base = mode === 'repel' ? CFG.repelFieldRadius : CFG.fieldRadius;
+    return base * (W <= 600 ? 0.8 : 1);
+  }
 
   function ensureAudio() {
     if (!audioCtx) {
@@ -142,9 +148,9 @@
   }
 
   function pickLevelMode() {
-    const earlyModes = ['attract', 'attract', 'repel', 'attract', 'repel'];
+    const earlyModes = ['attract', 'repel', 'repel', 'attract', 'repel'];
     if (level <= earlyModes.length) return earlyModes[level - 1];
-    const repelChance = Math.min(0.5, 0.2 + (level - 5) * 0.06);
+    const repelChance = Math.min(0.55, 0.28 + (level - 5) * 0.06);
     return Math.random() < repelChance ? 'repel' : 'attract';
   }
 
@@ -188,7 +194,15 @@
     field = null;
     pulse = null;
     activePointerId = null;
-    restRemaining = 1.6;
+    forceApplied = false;
+
+    clearTimeout(idleHintTimer);
+    idleHintTimer = null;
+    if (level <= 1) {
+      hintEl.classList.remove('faded');
+    } else {
+      scheduleHintReturn();
+    }
 
     setLevelMode(pickLevelMode());
 
@@ -265,6 +279,8 @@
   function finishLevel() {
     won = true;
     running = false;
+    clearTimeout(idleHintTimer);
+    idleHintTimer = null;
     field = null;
     pulse = null;
     activePointerId = null;
@@ -300,7 +316,6 @@
   }
 
   function updateGame(dt) {
-    restRemaining = Math.max(0, restRemaining - dt);
     const sources = [];
 
     if (field) {
@@ -325,7 +340,7 @@
 
       let ax = 0;
       let ay = 0;
-      if (restRemaining === 0) {
+      if (forceApplied) {
         ax = Math.cos(p.wanderPhase) * CFG.idleForce;
         ay = Math.sin(p.wanderPhase * 0.83 + p.wanderOffset) * CFG.idleForce;
         p.wanderPhase += p.wanderSpeed * dt;
@@ -335,7 +350,7 @@
         const dx = s.x - p.x;
         const dy = s.y - p.y;
         const dist = Math.hypot(dx, dy) || 1;
-        const radius = s.mode === 'repel' ? CFG.repelFieldRadius : CFG.fieldRadius;
+        const radius = fieldRadiusFor(s.mode);
         const fall = 1 - dist / radius;
         if (fall <= 0) continue;
 
@@ -412,8 +427,8 @@
   }
 
   function drawField(f, alpha) {
-    const rgb = f.mode === 'attract' ? '156,255,46' : '255,107,107';
-    const radius = f.mode === 'repel' ? CFG.repelFieldRadius : CFG.fieldRadius;
+    const rgb = f.mode === 'attract' ? '77,141,255' : '255,107,107';
+    const radius = fieldRadiusFor(f.mode);
     uctx.save();
     uctx.globalAlpha = alpha;
 
@@ -550,11 +565,18 @@
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   }
 
-  function markInteracted() {
-    if (!interacted) {
-      interacted = true;
-      hintEl.classList.add('faded');
-    }
+  function scheduleHintReturn() {
+    clearTimeout(idleHintTimer);
+    if (level <= 1) return;
+    idleHintTimer = setTimeout(() => {
+      idleHintTimer = null;
+      hintEl.classList.remove('faded');
+    }, HINT_IDLE_MS);
+  }
+
+  function noteActivity() {
+    hintEl.classList.add('faded');
+    scheduleHintReturn();
   }
 
   stage.addEventListener('pointerdown', e => {
@@ -564,7 +586,8 @@
 
     ensureAudio();
     e.preventDefault();
-    markInteracted();
+    noteActivity();
+    forceApplied = true;
 
     const p = localPoint(e);
     activePointerId = e.pointerId;
@@ -586,6 +609,7 @@
   stage.addEventListener('pointermove', e => {
     if (e.pointerId !== activePointerId || !field) return;
     e.preventDefault();
+    noteActivity();
     const p = localPoint(e);
     field.x = p.x;
     field.y = p.y;
