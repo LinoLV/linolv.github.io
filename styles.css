@@ -1,8 +1,15 @@
+@font-face {
+  font-family: "Aldo the Apache";
+  src: url("aldo-the-apache.woff") format("woff");
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
     --stage: #000000;
     --ink: #f5f5f7;
-    --tile-line: rgba(255, 255, 255, 0.18);
-    --tile-line-hover: rgba(255, 255, 255, 0.4);
+    --tile-line: #ffffff;
+    --tile-line-hover: #ffffff;
     --tile-bg1: #1c1c1e;
     --tile-bg2: #0a0a0a;
     --pill-bg: #ffffff;
@@ -17,8 +24,8 @@
   :root[data-theme="light"] {
     --stage: #f4f4f6;
     --ink: #15171a;
-    --tile-line: rgba(0, 0, 0, 0.12);
-    --tile-line-hover: rgba(0, 0, 0, 0.32);
+    --tile-line: #ffffff;
+    --tile-line-hover: #ffffff;
     --tile-bg1: #ffffff;
     --tile-bg2: #e9e9ed;
     --pill-line: rgba(0, 0, 0, 0.12);
