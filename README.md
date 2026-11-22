@@ -2,8 +2,6 @@
 A collection of fun, interactive, and creative mini-games built for the web.
 Explore the projects below and have fun playing!
 
----
-
 ## 🎮 Projects
 
 ### [🪐 Particle Field](https://linolv.github.io/particle-field)
@@ -23,5 +21,5 @@ Explore the projects below and have fun playing!
 - Simple to play, but harder than it sounds!
 
 ---
-Thanks for visiting! Have fun! ❤️
+Thanks for visiting! Have fun! ❤️ \
 Licensed under the [GNU GPL-3.0](https://github.com/LinoLV/linolv.github.io/tree/main?tab=GPL-3.0-1-ov-file)
