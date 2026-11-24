@@ -162,8 +162,8 @@
 
     const repel = next === 'repel';
     hintLead.textContent = repel
-      ? 'Tap / Hold to push the particles away'
-      : 'Tap / Hold to control the particles';
+      ? 'Tap/Hold to push the particles away'
+      : 'Tap/Hold to control the particles';
     hintDetail.textContent = repel
       ? 'Drag to push particles away, then guide them into their matching colors'
       : 'Drag the particles toward their matching colors';
