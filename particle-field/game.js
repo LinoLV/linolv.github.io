@@ -15,6 +15,8 @@
   const modeLabel = document.getElementById('mode-label');
   const modeValue = document.getElementById('mode-value');
   const hintEl = document.getElementById('hint');
+  const hintLead = document.getElementById('hintLead');
+  const hintDetail = document.getElementById('hintDetail');
   const overlay = document.getElementById('overlay');
   const overlayKicker = document.getElementById('overlay-kicker');
   const overlayTitle = document.getElementById('overlay-title');
@@ -42,7 +44,7 @@
     targetRadius: 24,
     fieldRadius: 95,
     repelFieldRadius: 118,
-    attractForce: 1600,
+    attractForce: 1750,
     repelForce: 2600,
     pulseForce: 3200,
     repelPulseForce: 5600,
@@ -159,6 +161,14 @@
     modeValue.textContent = next.toUpperCase();
     modeLabel.dataset.mode = next;
     modeLabel.setAttribute('aria-label', `Current level mode: ${next}`);
+
+    const repel = next === 'repel';
+    hintLead.textContent = repel
+      ? 'Tap/Hold to push the particles away'
+      : 'Tap/Hold to control the particles';
+    hintDetail.textContent = repel
+      ? 'Drag to push particles away, then guide them into their matching colors'
+      : 'Drag the particles toward their matching colors';
   }
 
   function resize() {

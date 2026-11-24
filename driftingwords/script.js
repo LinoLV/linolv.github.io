@@ -219,7 +219,14 @@
     }
     items.forEach(function (it) {
       var r = document.createElement("div"); r.className = "row";
-      var d = document.createElement("span"); d.className = "dot"; d.style.background = it.color;
+      var d = document.createElement("input");
+      d.type = "color"; d.className = "dot"; d.value = it.color;
+      d.title = "Change color for " + it.text;
+      d.setAttribute("aria-label", "Change color for " + it.text);
+      d.addEventListener("input", function () {
+        it.color = d.value;
+        it.ci = -1;
+      });
       var l = document.createElement("span"); l.className = "lbl"; l.textContent = it.text; l.title = it.text;
       var s = document.createElement("select");
       s.setAttribute("aria-label", "Sound for " + it.text);

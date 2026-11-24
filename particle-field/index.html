@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <meta name="theme-color" content="#000000" />
   <title>Particle Field</title>
+  <link rel="icon" href="../icon.png">
+  <meta property="og:image" content="../icon.png">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -12,7 +14,7 @@
     <canvas id="trail-canvas" aria-hidden="true"></canvas>
     <canvas id="ui-canvas" aria-hidden="true"></canvas>
 
-    <a id="appIcon" href="https://linolv.github.io" aria-label="Visit linolv.github.io">
+    <a id="appIcon" href="../" aria-label="Visit main page">
       <img src="../icon.png" alt="Particle Field">
     </a>
 
@@ -26,7 +28,7 @@
           <span class="stat-label">MODE</span>
           <span class="stat-value" id="mode-value">ATTRACT</span>
         </span>
-        <a id="moreBtn" href="https://linolv.github.io" title="More games">More Games</a>
+        <a id="moreBtn" href="../" title="More games">More Games</a>
         <a id="coffeeBtn" href="https://www.buymeacoffee.com/linolv" target="_blank" rel="noopener noreferrer" aria-label="Buy me a coffee" title="Buy me a coffee">
           <img src="../driftingwords/buymeacoffee-light.png" alt="">
         </a>
@@ -34,8 +36,8 @@
     </header>
 
     <p id="hint" class="hint">
-      Tap / Hold to control the particles
-      <span>Drag the particles toward their matching colors</span>
+      <span id="hintLead">Tap / Hold to control the particles</span>
+      <span id="hintDetail">Drag the particles toward their matching colors</span>
     </p>
 
     <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
