@@ -43,7 +43,6 @@
     particleRadius: 7,
     targetRadius: 24,
     fieldRadius: 95,
-    repelFieldRadius: 118,
     attractForce: 1750,
     repelForce: 2600,
     pulseForce: 3200,
@@ -81,9 +80,8 @@
   const tx = t => t.rx * W;
   const ty = t => t.ry * H;
 
-  function fieldRadiusFor(mode) {
-    const base = mode === 'repel' ? CFG.repelFieldRadius : CFG.fieldRadius;
-    return base * (W <= 600 ? 0.8 : 1);
+  function fieldRadius() {
+    return CFG.fieldRadius * (W <= 600 ? 0.8 : 1);
   }
 
   function ensureAudio() {
@@ -164,8 +162,8 @@
 
     const repel = next === 'repel';
     hintLead.textContent = repel
-      ? 'Tap/Hold to push the particles away'
-      : 'Tap/Hold to control the particles';
+      ? 'Tap / Hold to push the particles away'
+      : 'Tap / Hold to control the particles';
     hintDetail.textContent = repel
       ? 'Drag to push particles away, then guide them into their matching colors'
       : 'Drag the particles toward their matching colors';
@@ -360,7 +358,7 @@
         const dx = s.x - p.x;
         const dy = s.y - p.y;
         const dist = Math.hypot(dx, dy) || 1;
-        const radius = fieldRadiusFor(s.mode);
+        const radius = fieldRadius();
         const fall = 1 - dist / radius;
         if (fall <= 0) continue;
 
@@ -438,7 +436,7 @@
 
   function drawField(f, alpha) {
     const rgb = f.mode === 'attract' ? '77,141,255' : '255,107,107';
-    const radius = fieldRadiusFor(f.mode);
+    const radius = fieldRadius();
     uctx.save();
     uctx.globalAlpha = alpha;
 
